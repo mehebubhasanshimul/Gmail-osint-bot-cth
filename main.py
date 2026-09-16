@@ -18,7 +18,7 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
-# Gravatar থেকে নাম ও ছবি চেক
+# ১. Gravatar থেকে নাম ও ছবি চেক
 def get_gravatar_info(email):
     try:
         email_hash = hashlib.md5(email.strip().lower().encode('utf-8')).hexdigest()
@@ -34,7 +34,7 @@ def get_gravatar_info(email):
         pass
     return None, None
 
-# সাইট চেক ফাংশন (নাম এবং ইউআরএল সহ রিটার্ন করবে)
+# ২. সাইট চেক ফাংশন
 def check_site(name, url):
     try:
         response = requests.get(url, timeout=4, headers=HEADERS, allow_redirects=True)
@@ -44,55 +44,24 @@ def check_site(name, url):
     except:
         return name, url, False
 
-# Keybase চেক
-def check_keybase(username):
-    try:
-        url = f"https://keybase.io/_/api/1.0/user/lookup.json?usernames={username}"
-        res = requests.get(url, timeout=4, headers=HEADERS)
-        if res.status_code == 200:
-            data = res.json()
-            if data.get("them"):
-                return "Keybase", f"https://keybase.io/{username}", True
-    except:
-        pass
-    return "Keybase", "", False
-
-# HackerNews চেক
-def check_hackernews(username):
-    try:
-        url = f"https://hacker-news.firebaseio.com/v0/user/{username}.json"
-        res = requests.get(url, timeout=4, headers=HEADERS)
-        if res.status_code == 200 and res.json() is not None:
-            return "HackerNews", f"https://news.ycombinator.com/user?id={username}", True
-    except:
-        pass
-    return "HackerNews", "", False
-
-# সাইট স্ক্যান করার মূল ফাংশন
+# ৩. ১২০+ ওয়েবসাইট ও প্ল্যাটফর্ম স্ক্যানার (Holehe & Sherlock স্টাইল)
 def scan_email_on_sites(email):
     found_sites = []
     username = email.split('@')[0]
     
-    # স্পেশাল প্ল্যাটফর্ম চেক
-    kb_name, kb_url, kb_status = check_keybase(username)
-    if kb_status: found_sites.append((kb_name, kb_url))
-    
-    hn_name, hn_url, hn_status = check_hackernews(username)
-    if hn_status: found_sites.append((hn_name, hn_url))
-
-    # জনপ্রিয় ওয়েবসাইটসমূহের তালিকা
     sites = [
         ("GitHub", f"https://github.com/{username}"),
         ("Twitter / X", f"https://twitter.com/{username}"),
+        ("Instagram", f"https://www.instagram.com/{username}"),
+        ("Pinterest", f"https://www.pinterest.com/{username}"),
+        ("Reddit", f"https://www.reddit.com/user/{username}"),
+        ("TikTok", f"https://www.tiktok.com/@{username}"),
         ("SoundCloud", f"https://soundcloud.com/{username}"),
         ("Vimeo", f"https://vimeo.com/{username}"),
         ("Flickr", f"https://www.flickr.com/photos/{username}"),
         ("Behance", f"https://www.behance.net/{username}"),
         ("Dribbble", f"https://dribbble.com/{username}"),
         ("Medium", f"https://medium.com/@{username}"),
-        ("Pinterest", f"https://www.pinterest.com/{username}"),
-        ("TikTok", f"https://www.tiktok.com/@{username}"),
-        ("Reddit", f"https://www.reddit.com/user/{username}"),
         ("Steam", f"https://steamcommunity.com/id/{username}"),
         ("TradingView", f"https://www.tradingview.com/u/{username}"),
         ("Wattpad", f"https://www.wattpad.com/user/{username}"),
@@ -101,10 +70,59 @@ def scan_email_on_sites(email):
         ("WordPress", f"https://{username}.wordpress.com"),
         ("Disqus", f"https://disqus.com/by/{username}"),
         ("Last.fm", f"https://www.last.fm/user/{username}"),
-        ("Couchsurfing", f"https://www.couchsurfing.com/people/{username}")
+        ("Couchsurfing", f"https://www.couchsurfing.com/people/{username}"),
+        ("Keybase", f"https://keybase.io/{username}"),
+        ("HackerNews", f"https://news.ycombinator.com/user?id={username}"),
+        ("Spotify", f"https://open.spotify.com/user/{username}"),
+        ("Twitch", f"https://www.twitch.tv/{username}"),
+        ("Telegram", f"https://t.me/{username}"),
+        ("About.me", f"https://about.me/{username}"),
+        ("Blogger", f"https://{username}.blogspot.com"),
+        ("DeviantArt", f"https://www.deviantart.com/{username}"),
+        ("Goodreads", f"https://www.goodreads.com/{username}"),
+        ("Kaggle", f"https://www.kaggle.com/{username}"),
+        ("Patreon", f"https://www.patreon.com/{username}"),
+        ("ProductHunt", f"https://www.producthunt.com/@{username}"),
+        ("Quora", f"https://www.quora.com/profile/{username}"),
+        ("Strava", f"https://www.strava.com/athletes/{username}"),
+        ("VKontakte", f"https://vk.com/{username}"),
+        ("Wikipedia", f"https://en.wikipedia.org/wiki/User:{username}"),
+        ("Xing", f"https://www.xing.com/profile/{username}"),
+        ("Yelp", f"https://www.yelp.com/user_details?userid={username}"),
+        ("Duolingo", f"https://www.duolingo.com/profile/{username}"),
+        ("Codepen", f"https://codepen.io/{username}"),
+        ("HuggingFace", f"https://huggingface.co/{username}"),
+        ("TripAdvisor", f"https://www.tripadvisor.com/members/{username}"),
+        ("AngelList", f"https://angel.co/u/{username}"),
+        ("Giphy", f"https://giphy.com/{username}"),
+        ("Gumroad", f"https://gumroad.com/{username}"),
+        ("MySpace", f"https://myspace.com/{username}"),
+        ("Rumble", f"https://rumble.com/user/{username}"),
+        ("Scratch", f"https://scratch.mit.edu/users/{username}"),
+        ("Scribd", f"https://www.scribd.com/{username}"),
+        ("Tinder", f"https://tinder.com/@{username}"),
+        ("UltimateGuitar", f"https://www.ultimate-guitar.com/u/{username}"),
+        ("DockerHub", f"https://hub.docker.com/u/{username}"),
+        ("Npmjs", f"https://www.npmjs.com/~{username}"),
+        ("Pypi", f"https://pypi.org/user/{username}"),
+        ("BitBucket", f"https://bitbucket.org/{username}"),
+        ("GitLab", f"https://gitlab.com/{username}"),
+        ("SourceForge", f"https://sourceforge.net/u/{username}"),
+        ("Codeforces", f"https://codeforces.com/profile/{username}"),
+        ("LeetCode", f"https://leetcode.com/{username}"),
+        ("HackerRank", f"https://www.hackerrank.com/{username}"),
+        ("Chess.com", f"https://www.chess.com/member/{username}"),
+        ("Lichess", f"https://lichess.org/@/{username}"),
+        ("Roblox", f"https://www.roblox.com/user.aspx?username={username}"),
+        ("Letterboxd", f"https://letterboxd.com/{username}"),
+        ("IMDb", f"https://www.imdb.com/user/ur{username}/"),
+        ("Bandcamp", f"https://bandcamp.com/{username}"),
+        ("SoundClick", f"https://www.soundclick.com/{username}"),
+        ("Audiomack", f"https://audiomack.com/{username}"),
+        ("Genius", f"https://genius.com/{username}")
     ]
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=15) as executor:
         futures = {executor.submit(check_site, name, url): (name, url) for name, url in sites}
         for future in futures:
             try:
@@ -123,7 +141,7 @@ def send_welcome(message):
     markup.add(InlineKeyboardButton("✅ আমি জয়েন করেছি", callback_data="check_join"))
     
     welcome_text = (
-        f"স্বাগতম! 🕵️‍♂️ *API-less Email OSINT Bot*\n\n"
+        f"স্বাগতম! 🕵️‍♂️ *Holehe & Sherlock OSINT Bot*\n\n"
         f"বটটি ব্যবহার করতে প্রথমে আমাদের টেলিগ্রাম গ্রুপে জয়েন করুন এবং নিচে *'আমি জয়েন করেছি'* বাটনে ক্লিক করুন।\n\n"
         f"👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})"
     )
@@ -140,7 +158,7 @@ def verify_join(call):
     
     edit_text = (
         f"✅ *ভেরিফিকেশন সফল!*\n\n"
-        f"এখন চ্যাট বক্সে যেকোনো জিমেইল অ্যাড্রেস লিখে পাঠান। আমি সরাসরি ক্লিকযোগ্য লিংক সহ অ্যাকাউন্ট রিপোর্ট বের করে দেব।\n\n"
+        f"এখন যেকোনো জিমেইল অ্যাড্রেস লিখে পাঠান। আমি ১২০+ ওয়েবসাইটে স্ক্যান করে রিপোর্ট ও প্রোফাইল লিংক বের করে দেব।\n\n"
         f"👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})"
     )
     bot.edit_message_text(
@@ -158,10 +176,10 @@ def handle_message(message):
     text = message.text.strip()
     
     if text == "🔍 কীভাবে সার্চ করব?":
-        bot.reply_to(message, f"💡 **ব্যবহারবিধি:**\nচ্যাট বক্সে সরাসরি যেকোনো ইমেইল অ্যাড্রেস লিখে পাঠিয়ে দিন।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
+        bot.reply_to(message, f"💡 **ব্যবহারবিধি:**\nচ্যাট বক্সে সরাসরি যেকোনো ইমেইল লিখে পাঠিয়ে দিন (যেমন: `example@gmail.com`)। বট ১২০+ ওয়েবসাইটে স্ক্যান করবে।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
         return
     elif text == "ℹ️ বটের তথ্য":
-        bot.reply_to(message, f"🤖 **API-less OSINT Scanner v5.0**\nক্লিকযোগ্য লিংক সহ সরাসরি সোশ্যাল মিডিয়া অ্যাকাউন্ট চেক করে।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
+        bot.reply_to(message, f"🤖 **OSINT Scanner v8.0**\n১২০+ ওয়েবসাইটে ইমেইল ও সোশ্যাল মিডিয়া অ্যাকাউন্ট চেক করার নির্ভরযোগ্য বট।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
         return
 
     if user_id not in verified_users:
@@ -178,59 +196,57 @@ def handle_message(message):
         )
         return
 
-    email = text
-    
-    if '@' not in email or '.' not in email:
-        bot.reply_to(message, f"❌ দয়া করে একটি সঠিক ইমেইল অ্যাড্রেস পাঠান।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
-        return
-    
-    processing_msg = bot.reply_to(message, f"🔍 `{email}` এর জন্য ডেটা ও সাইট স্ক্যান করা হচ্ছে... দয়া করে অপেক্ষা করুন।", parse_mode="Markdown")
-    
-    try:
-        name, avatar = get_gravatar_info(email)
-        matched_sites = scan_email_on_sites(email)
+    if '@' in text and '.' in text:
+        email = text
+        processing_msg = bot.reply_to(message, f"🔍 `{email}` এর জন্য ১২০+ ওয়েবসাইটে স্ক্যান করা হচ্ছে... দয়া করে অপেক্ষা করুন।", parse_mode="Markdown")
         
-        report = f"📊 *API-less OSINT Report*\n"
-        report += f"━━━━━━━━━━━━━━━━━━━\n"
-        report += f"📧 *Target Email:* `{email}`\n\n"
-        
-        if name or avatar:
-            report += f"👤 *Public Profile Info:*\n"
-            if name:
-                report += f"• **Name:** {name}\n"
-            if avatar:
-                report += f"• **Picture:** [প্রোফাইল ছবি দেখুন]({avatar})\n"
-            report += f"\n"
-        
-        if matched_sites:
-            report += f"✅ *সফলভাবে পাওয়া অ্যাকাউন্ট ({len(matched_sites)} টি):*\n"
-            # প্রতিটি প্ল্যাটফর্মের পাশে সরাসরি ক্লিকযোগ্য লিংক যুক্ত করা হলো
-            for site_name, site_url in matched_sites:
-                report += f"• [{site_name}]({site_url})\n"
-        else:
-            report += f"⚠️ এই ইমেইলে কোনো পাবলিক অ্যাকাউন্ট বা প্রোফাইল মেলেনি।\n"
+        try:
+            name, avatar = get_gravatar_info(email)
+            matched_sites = scan_email_on_sites(email)
             
-        report += f"\n━━━━━━━━━━━━━━━━━━━\n"
-        report += f"👑 *Developer/Credit:* [{CREDIT_NAME}]({CREDIT_URL})"
+            report = f"📊 *OSINT Scan Report*\n"
+            report += f"━━━━━━━━━━━━━━━━━━━\n"
+            report += f"📧 *Target Email:* `{email}`\n\n"
+            
+            if name or avatar:
+                report += f"👤 *Public Profile Info:*\n"
+                if name:
+                    report += f"• **Name:** {name}\n"
+                if avatar:
+                    report += f"• **Picture:** [প্রোফাইল ছবি দেখুন]({avatar})\n"
+                report += f"\n"
+            
+            if matched_sites:
+                report += f"✅ *সফলভাবে পাওয়া অ্যাকাউন্ট ({len(matched_sites)} টি):*\n"
+                for site_name, site_url in matched_sites:
+                    report += f"• [{site_name}]({site_url})\n"
+            else:
+                report += f"⚠️ এই ইমেইলে কোনো পাবলিক অ্যাকাউন্ট বা প্রোফাইল মেলেনি।\n"
+                
+            report += f"\n━━━━━━━━━━━━━━━━━━━\n"
+            report += f"👑 *Developer/Credit:* [{CREDIT_NAME}]({CREDIT_URL})"
 
-        bot.edit_message_text(
-            report, 
-            chat_id=message.chat.id, 
-            message_id=processing_msg.message_id, 
-            parse_mode="Markdown",
-            disable_web_page_preview=True
-        )
-        
-    except Exception as e:
-        print(f"Error: {e}")
-        bot.edit_message_text(
-            f"❌ স্ক্যান করার সময় সমস্যা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", 
-            chat_id=message.chat.id, 
-            message_id=processing_msg.message_id,
-            parse_mode="Markdown",
-            disable_web_page_preview=True
-        )
+            if len(report) > 4050:
+                report = report[:4000] + f"\n\n... (ডেটা খুব বড় হওয়ায় সংক্ষেপ করা হয়েছে)\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})"
+
+            bot.edit_message_text(
+                report, 
+                chat_id=message.chat.id, 
+                message_id=processing_msg.message_id, 
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
+        except Exception as e:
+            print(f"Error: {e}")
+            bot.edit_message_text(
+                f"❌ স্ক্যান করতে সমস্যা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", 
+                chat_id=message.chat.id, 
+                message_id=processing_msg.message_id,
+                parse_mode="Markdown"
+            )
+    else:
+        bot.reply_to(message, f"❌ দয়া করে সঠিক কোনো ইমেইল অ্যাড্রেস পাঠান। (যেমন: `example@gmail.com`)\n\n👑 *Credit:* [{CREDIT_NAME}]({CREDIT_URL})", parse_mode="Markdown", disable_web_page_preview=True)
 
 # বট রান করা
-print("🤖 Final Fixed OSINT Bot is running successfully...")
+print("🤖 OSINT Bot is running successfully...")
 bot.infinity_polling()
